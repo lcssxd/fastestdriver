@@ -1,6 +1,6 @@
 <template>
 	<footer class="bg-brand_blue_alt text-white border-t border-white">
-    <div class="container flex flex-col-reverse space-y-6 sm:flex-row sm:space-y-0 items-center justify-between mx-auto py-10 w-full">
+    <div class="container flex flex-col-reverse space-y-6 sm:flex-row sm:space-y-0 items-center justify-between mx-auto pb-[120px] pt-10 md:py-10 w-full">
       <div class="py-6 font-semibold text-center text-white">© {{ new Date().getFullYear() }} Fastest Driver. Todos os direitos reservados.</div>
       <div class="flex justify-start space-x-3">
         <a rel="noopener noreferrer" href="https://www.instagram.com/fastestdriver7l" target="_blank" title="Instagram" class="flex items-center p-1">
