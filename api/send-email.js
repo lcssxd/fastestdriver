@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer';
 
 const sendEmail = async (req, res) => {
-  const { nome, email, mensagem } = req.body;
+  const { name, email, message } = req.body;
 
-  if (!nome || !email || !mensagem) {
+  if (!name || !email || !message) {
     return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
   }
 
@@ -17,10 +17,10 @@ const sendEmail = async (req, res) => {
     });
 
     const mailOptions = {
-      from: `${nome} <${email}>`,
+      from: `${name} <${email}>`,
       to: 'luancesoares@gmail.com', // E-mail de destino
-      subject: `Contato de ${nome}`,
-      text: mensagem
+      subject: `Contato de ${name}`,
+      text: message
     };
 
     const info = await transporter.sendMail(mailOptions);
