@@ -2,16 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "nuxt.config.js",
-      "use": "@nuxtjs/vercel-builder"
+      "use": "@vercel/static-build"
     }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/.output/public/$1" }
   ]
 }
