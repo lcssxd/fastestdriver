@@ -39,6 +39,7 @@
           <span class="mb-1">Mensagem</span>
           <textarea rows="3" v-model="message" class="block w-full rounded-md outline-none bg-white text-black p-2"></textarea>
         </label>
+        <div class="g-recaptcha" data-sitekey="6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ"></div>
         <button type="submit" class="px-8 py-3 text-lg rounded bg-white text-brand_blue uppercase font-semibold">Enviar Mensagem</button>
       </form>
     </div>
@@ -50,6 +51,15 @@ import HeroSection from '~/components/HeroSection.vue';
 
 export default {
   components: { HeroSection },
+  head: {
+    script: [
+      {
+        src: 'https://www.google.com/recaptcha/api.js',
+        async: true,
+        defer: true
+      }
+    ]
+  },
   data() {
     return {
       name: '',
@@ -60,6 +70,15 @@ export default {
   methods: {
     async sendEmail() {
       try {
+        // Obter o token do reCAPTCHA
+        const recaptchaToken = grecaptcha.getResponse();
+
+        if (!recaptchaToken) {
+          alert('Por favor, resolva o reCAPTCHA.');
+          return;
+        }
+
+        // Enviar os dados e o token para o backend
         const response = await fetch('/api/send-email', {
           method: 'POST',
           headers: {
@@ -68,21 +87,23 @@ export default {
           body: JSON.stringify({
             name: this.name,
             email: this.email,
-            message: this.message
+            message: this.message,
+            recaptchaToken
           })
         });
 
+        const data = await response.json();
         if (response.ok) {
           alert('E-mail enviado com sucesso!');
           this.name = '';
           this.email = '';
           this.message = '';
         } else {
-          alert('Erro ao enviar o e-mail. Tente novamente.');
+          alert(`Erro: ${data.message}`);
         }
       } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao enviar o e-mail. Tente novamente.');
+        console.error(error);
+        alert('Erro ao enviar o e-mail.');
       }
     }
   }
