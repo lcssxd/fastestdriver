@@ -1,28 +1,45 @@
 import fetch from 'node-fetch';
 import nodemailer from 'nodemailer';
 
+const validateRecaptchaEnterprise = async (recaptchaToken) => {
+  const apiKey = process.env.RECAPTCHA_API_KEY; // Adicione sua API Key aqui
+  const projectId = process.env.RECAPTCHA_PROJECT_ID; // ID do projeto no Google Cloud
+  const siteKey = process.env.RECAPTCHA_SITE_KEY; // Site Key configurada
+
+  const response = await fetch(
+    `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/assessments?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event: {
+          token: recaptchaToken,
+          siteKey: siteKey,
+          expectedAction: 'submit' // Ação definida no frontend
+        }
+      })
+    }
+  );
+
+  const data = await response.json();
+  return data.tokenProperties?.valid && data.riskAnalysis?.score > 0.5; // Apenas aprova se o score for maior que 0.5
+};
+
 export default async function handler(req, res) {
   const { name, email, message, recaptchaToken } = req.body;
 
   if (!name || !email || !message || !recaptchaToken) {
-    return res.status(400).json({ message: 'Todos os campos são obrigatórios, incluindo o reCAPTCHA.' });
+    return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
   }
 
-  // Validação do reCAPTCHA v3
+  // Validação do reCAPTCHA Enterprise
+  const isValidRecaptcha = await validateRecaptchaEnterprise(recaptchaToken);
+
+  if (!isValidRecaptcha) {
+    return res.status(400).json({ message: 'Falha na validação do reCAPTCHA.' });
+  }
+
   try {
-    const recaptchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`
-    });
-
-    const recaptchaData = await recaptchaResponse.json();
-
-    if (!recaptchaData.success) {
-      return res.status(400).json({ message: 'Falha na validação do reCAPTCHA.' });
-    }
-
-    // Prosseguir com o envio do e-mail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {

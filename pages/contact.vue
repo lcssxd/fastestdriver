@@ -60,27 +60,38 @@ export default {
   methods: {
     async sendEmail() {
       try {
-        // Obter o token do reCAPTCHA
-        const recaptchaToken = await grecaptcha.enterprise.execute('6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ', { action: 'submit' });
+        grecaptcha.enterprise.ready(async () => {
+          const recaptchaToken = await grecaptcha.enterprise.execute(
+            '6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ',
+            { action: 'submit' }
+          );
 
-        // Enviar os dados para o backend
-        const response = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: this.name,
-            email: this.email,
-            message: this.message,
-            recaptchaToken
-          })
+          if (!recaptchaToken) {
+            alert('Erro ao gerar o token do reCAPTCHA.');
+            return;
+          }
+
+          const response = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: this.name,
+              email: this.email,
+              message: this.message,
+              recaptchaToken
+            })
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            alert('E-mail enviado com sucesso!');
+            this.name = '';
+            this.email = '';
+            this.message = '';
+          } else {
+            alert(`Erro: ${data.message}`);
+          }
         });
-
-        const data = await response.json();
-        if (response.ok) {
-          alert('E-mail enviado com sucesso!');
-        } else {
-          alert(`Erro: ${data.message}`);
-        }
       } catch (error) {
         console.error('Erro ao enviar o e-mail:', error);
         alert('Erro ao enviar o e-mail.');
