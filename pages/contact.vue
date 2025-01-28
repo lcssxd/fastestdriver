@@ -26,18 +26,18 @@
           </a>
         </div>
       </div>
-      <form novalidate="" class="flex flex-col py-6 space-y-6 md:py-0 md:pl-6">
+      <form @submit.prevent="sendEmail" novalidate class="flex flex-col py-6 space-y-6 md:py-0 md:pl-6">
         <label class="block">
           <span class="mb-1">Nome completo</span>
-          <input type="text" class="block w-full rounded-md shadow-sm outline-none bg-white text-black p-2">
+          <input type="text" v-model="name" class="block w-full rounded-md shadow-sm outline-none bg-white text-black p-2">
         </label>
         <label class="block">
           <span class="mb-1">Email</span>
-          <input type="email" class="block w-full rounded-md shadow-sm outline-none bg-white text-black p-2">
+          <input type="email" v-model="email" class="block w-full rounded-md shadow-sm outline-none bg-white text-black p-2">
         </label>
         <label class="block">
           <span class="mb-1">Mensagem</span>
-          <textarea rows="3" class="block w-full rounded-md outline-none bg-white text-black p-2"></textarea>
+          <textarea rows="3" v-model="message" class="block w-full rounded-md outline-none bg-white text-black p-2"></textarea>
         </label>
         <button type="submit" class="px-8 py-3 text-lg rounded bg-white text-brand_blue uppercase font-semibold">Enviar Mensagem</button>
       </form>
@@ -49,7 +49,43 @@
 import HeroSection from '~/components/HeroSection.vue';
 
 export default {
-  components: { HeroSection }
+  components: { HeroSection },
+  data() {
+    return {
+      name: '',
+      email: '',
+      message: ''
+    }
+  },
+  methods: {
+    async sendEmail() {
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: this.name,
+            email: this.email,
+            message: this.message
+          })
+        });
+
+        if (response.ok) {
+          alert('E-mail enviado com sucesso!');
+          this.name = '';
+          this.email = '';
+          this.message = '';
+        } else {
+          alert('Erro ao enviar o e-mail. Tente novamente.');
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao enviar o e-mail. Tente novamente.');
+      }
+    }
+  }
 }
 </script>
 
