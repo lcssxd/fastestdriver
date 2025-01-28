@@ -1,57 +1,52 @@
 import nodemailer from 'nodemailer';
-import fetch from 'node-fetch'; // Para fazer requisições HTTP
+import fetch from 'node-fetch';
 
-const sendEmail = async (req, res) => {
+const validateRecaptcha = async (recaptchaToken) => {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+
+  const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `secret=${secretKey}&response=${recaptchaToken}`
+  });
+
+  const data = await response.json();
+  return data.success;
+};
+
+export default async (req, res) => {
   const { name, email, message, recaptchaToken } = req.body;
 
-  // Verificar se os campos obrigatórios estão preenchidos
   if (!name || !email || !message || !recaptchaToken) {
-    return res.status(400).json({ message: 'Todos os campos são obrigatórios, incluindo o reCAPTCHA.' });
+    return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+  }
+
+  const isValidRecaptcha = await validateRecaptcha(recaptchaToken);
+
+  if (!isValidRecaptcha) {
+    return res.status(400).json({ message: 'Falha na validação do reCAPTCHA.' });
   }
 
   try {
-    // Validação do reCAPTCHA com a API do Google
-    const recaptchaResponse = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`
-    });
-
-    const recaptchaData = await recaptchaResponse.json();
-
-    // Verificar se o reCAPTCHA foi validado
-    if (!recaptchaData.success) {
-      return res.status(400).json({ message: 'Falha na validação do reCAPTCHA.' });
-    }
-
-    // Criar o transporte para envio de e-mails
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // Configurado na Vercel
-        pass: process.env.EMAIL_PASS // Configurado na Vercel
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
-    // Configurar as opções do e-mail
     const mailOptions = {
       from: `${name} <${email}>`,
-      to: 'luancesoares@gmail.com', // E-mail de destino
+      to: 'luancesoares@gmail.com',
       subject: `Contato de ${name}`,
       text: message
     };
 
-    // Enviar o e-mail
-    const info = await transporter.sendMail(mailOptions);
-    console.log('E-mail enviado:', info);
-
+    await transporter.sendMail(mailOptions);
     res.status(200).json({ message: 'E-mail enviado com sucesso!' });
   } catch (error) {
     console.error('Erro ao enviar o e-mail:', error);
     res.status(500).json({ message: 'Erro ao enviar o e-mail.', error: error.message });
   }
 };
-
-export default sendEmail;

@@ -39,7 +39,6 @@
           <span class="mb-1">Mensagem</span>
           <textarea rows="3" v-model="message" class="block w-full rounded-md outline-none bg-white text-black p-2"></textarea>
         </label>
-        <div class="g-recaptcha" data-sitekey="6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ"></div>
         <button type="submit" class="px-8 py-3 text-lg rounded bg-white text-brand_blue uppercase font-semibold">Enviar Mensagem</button>
       </form>
     </div>
@@ -51,15 +50,6 @@ import HeroSection from '~/components/HeroSection.vue';
 
 export default {
   components: { HeroSection },
-  head: {
-    script: [
-      {
-        src: 'https://www.google.com/recaptcha/enterprise.js?render=6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ',
-        async: true,
-        defer: true
-      }
-    ]
-  },
   data() {
     return {
       name: '',
@@ -71,19 +61,12 @@ export default {
     async sendEmail() {
       try {
         // Obter o token do reCAPTCHA
-        const recaptchaToken = grecaptcha.getResponse();
+        const recaptchaToken = await grecaptcha.execute('6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ', { action: 'submit' });
 
-        if (!recaptchaToken) {
-          alert('Por favor, resolva o reCAPTCHA.');
-          return;
-        }
-
-        // Enviar os dados e o token para o backend
+        // Enviar os dados para o backend
         const response = await fetch('/api/send-email', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: this.name,
             email: this.email,
@@ -95,14 +78,11 @@ export default {
         const data = await response.json();
         if (response.ok) {
           alert('E-mail enviado com sucesso!');
-          this.name = '';
-          this.email = '';
-          this.message = '';
         } else {
           alert(`Erro: ${data.message}`);
         }
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao enviar o e-mail:', error);
         alert('Erro ao enviar o e-mail.');
       }
     }
