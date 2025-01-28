@@ -58,5 +58,8 @@ export default {
         autoprefixer: {}
       }
     }
-  }
+  },
+
+  serverMiddleware:
+    process.env.NODE_ENV === 'production' ? [] : ['~/api/index.js'],
 }

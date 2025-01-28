@@ -1,10 +1,6 @@
 import nodemailer from 'nodemailer';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido' });
-  }
-
+const sendEmail = async (req, res) => {
   const { nome, email, mensagem } = req.body;
 
   if (!nome || !email || !mensagem) {
@@ -15,14 +11,14 @@ export default async function handler(req, res) {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.EMAIL_USER, // Configurado na Vercel
+        pass: process.env.EMAIL_PASS // Configurado na Vercel
       }
     });
 
     const mailOptions = {
       from: `${nome} <${email}>`,
-      to: 'luancesoares@gmail.com',
+      to: 'luancesoares@gmail.com', // E-mail de destino
       subject: `Contato de ${nome}`,
       text: mensagem
     };
@@ -35,4 +31,6 @@ export default async function handler(req, res) {
     console.error('Erro ao enviar o e-mail:', error);
     res.status(500).json({ message: 'Erro ao enviar o e-mail.', error: error.message });
   }
-}
+};
+
+export default sendEmail;
