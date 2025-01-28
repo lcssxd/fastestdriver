@@ -12,29 +12,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Configuração do transporte de e-mail
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Substitua se usar outro serviço
+      service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // Adicione no painel da Vercel
-        pass: process.env.EMAIL_PASS  // Adicione no painel da Vercel
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
-    // Configurar o e-mail a ser enviado
     const mailOptions = {
-      from: email, // Quem enviou
-      to: 'luancesoares@gmail.com', // Destinatário fixo
+      from: `${nome} <${email}>`,
+      to: 'luancesoares@gmail.com',
       subject: `Contato de ${nome}`,
       text: mensagem
     };
 
-    // Enviar o e-mail
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('E-mail enviado:', info);
 
     res.status(200).json({ message: 'E-mail enviado com sucesso!' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao enviar o e-mail.' });
+    console.error('Erro ao enviar o e-mail:', error);
+    res.status(500).json({ message: 'Erro ao enviar o e-mail.', error: error.message });
   }
 }
