@@ -22,11 +22,7 @@ export default {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ],
     script: [
-      {
-        src: 'https://www.google.com/recaptcha/enterprise.js?render=6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ',
-        async: true,
-        defer: true
-      }
+      { src: 'https://www.google.com/recaptcha/enterprise.js?render=6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ' }
     ]
   },
 

@@ -61,7 +61,7 @@ export default {
     async sendEmail() {
       try {
         // Obter o token do reCAPTCHA
-        const recaptchaToken = await grecaptcha.execute('6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ', { action: 'submit' });
+        const recaptchaToken = await grecaptcha.enterprise.execute('6LcHUsUqAAAAABZNOf7otV73yiXqVj8lTgd0TjUZ', { action: 'submit' });
 
         // Enviar os dados para o backend
         const response = await fetch('/api/send-email', {
