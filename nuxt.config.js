@@ -61,6 +61,6 @@ export default {
   },
 
   serverMiddleware: [
-    '~/api/send-email.js'
+    { path: '/api', handler: '~/server-middleware/index.js' }
   ],
 }
