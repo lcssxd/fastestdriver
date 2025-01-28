@@ -1,6 +1,13 @@
 {
   "version": 2,
+  "env": {
+    "ON_VERCEL": "true"
+  },
   "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@now/node"
+    },
     {
       "src": "nuxt.config.js",
       "use": "@nuxtjs/vercel-builder",
@@ -10,6 +17,8 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" }
+    { "src": "/api/(.*)", "dest": "api/send-email.js" },
+    { "src": "/api", "dest": "api/send-email.js" },
+    { "src": "/(.*)", "dest": "$1" }
   ]
 }
